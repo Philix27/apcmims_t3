@@ -1,16 +1,11 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
     provider = "prisma-client-js"
 }
-
+// npx prisma db push
+// npm prisma migrate dev --name dname
 datasource db {
-    provider = "sqlite"
-    // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+    provider = "postgresql"
     url      = env("DATABASE_URL")
 }
 
@@ -27,14 +22,14 @@ model Account {
     type              String
     provider          String
     providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
+    refresh_token     String? 
+    access_token      String? 
     expires_at        Int?
     token_type        String?
     scope             String?
-    id_token          String? // @db.Text
+    id_token          String? 
     session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user              Member    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId])
 }
@@ -44,18 +39,54 @@ model Session {
     sessionToken String   @unique
     userId       String
     expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user         Member     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model User {
+model  Member {
+    @@index([email ])
+    @@unique([email, id])
     id            String    @id @default(cuid())
-    name          String?
+    firstname          String
+    lastname          String
+    maritalStatus          String
+    madienName          String
+    nationality          String
+    membershipRegNo          String
+
+    address          String
+    phone1          String
+    phone2          String
     email         String?   @unique
+
+    state          State @relation("State", fields: [stateId], references: [id])
+    stateId     String
+
+    lga           Lga @relation("Lga", fields: [lgaId], references: [id])
+    lgaId          String
+
+    ward           Ward @relation("Ward", fields: [wardId], references: [id])
+    wardId          String
+
+    pollingUnit           PollingUnit @relation("PollingUnit", fields: [pollingUnitId], references: [id])
+    pollingUnitId String
+
+    nin          String
+    dob          DateTime
+    gender          DateTime
+   
     emailVerified DateTime?
     image         String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
     accounts      Account[]
     sessions      Session[]
-}
+    nominationForm NominationForm[] @relation("CandidateForm")
+    formNominated NominationForm[] @relation("FormNominated")
+
+
+    
+}   
+
 
 model VerificationToken {
     identifier String
@@ -63,4 +94,79 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model State {
+    id String    @id @default(cuid())
+    name String @unique
+    capital String
+    code String
+    members Member[] @relation("State")
+
+}
+model Lga {
+    id String    @id @default(cuid())
+    name String 
+    code String
+ members Member[]  @relation("Lga")
+}
+
+model Ward {
+    id String    @id @default(cuid())
+    name String 
+    code String
+ members Member[]  @relation("Ward")
+}
+
+model PollingUnit {
+    id String    @id @default(cuid())
+    name String 
+    code String
+ members Member[]  @relation("PollingUnit")
+}
+
+model Institution {
+     id String    @id @default(cuid())
+    institutionsAttended String
+}
+
+model NominationForm {
+    @@index([dateApproved, dateSigned ])
+
+    id String    @id @default(cuid())
+    dateSigned DateTime
+    dateApproved DateTime
+
+    position Position @default(HOSUE_OF_REP)
+
+    member Member[] @relation("CandidateForm")
+    nominatedBy Member[]  @relation("FormNominated")
+
+    institution String[]
+    workExperience Json
+
+    politicalHistory String
+    politicalAppointment String?
+    otherUsefulInfo String?
+
+    pendingCriminalTrial Boolean
+    pendingCriminalActReason String?
+
+    everBeenLunatic Boolean
+    everBeenLunaticReason String?
+
+    everBeenConvicted Boolean
+    everBeenConvictedReason String?
+
+    everBeenDeclearedBankrupt Boolean
+    everBeenDeclearedBankruptReason String?
+
+     
+}
+
+enum Position {
+   PRESIDENTIAL
+   SENATORIAL
+   GUBERNATORIAL
+   HOSUE_OF_REP
 }
