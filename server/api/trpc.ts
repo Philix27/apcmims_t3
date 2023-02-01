@@ -1,6 +1,5 @@
 /**
  * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
- * 1. You want to modify request context (see Part 1)
  * 2. You want to create a new middleware or type of procedure (see Part 3)
  *
  * tl;dr - this is where all the tRPC server stuff is created and plugged in.
@@ -35,6 +34,7 @@ type CreateContextOptions = {
  * - trpc's `createSSGHelpers` where we don't have req/res
  * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
+
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
@@ -47,6 +47,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  * process every request that goes through your tRPC endpoint
  * @link https://trpc.io/docs/context
  */
+
 export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   const { req, res } = opts;
 
@@ -64,6 +65,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
  * This is where the trpc api is initialized, connecting the context and
  * transformer
  */
+
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 

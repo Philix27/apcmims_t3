@@ -76,16 +76,30 @@ model  Member {
    
     emailVerified DateTime?
     image         String?
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    
     accounts      Account[]
     sessions      Session[]
     nominationForm NominationForm[] @relation("CandidateForm")
     formNominated NominationForm[] @relation("FormNominated")
-
-
+    dues Dues[] @relation("Dues")
     
 }   
+
+model Dues {
+     id String    @id @default(cuid())
+     type PaymentTypes
+    datePaid DateTime
+    userId String
+    member Member @relation("Dues", fields: [userId], references: [id])
+    
+}
+
+enum PaymentTypes {
+    MONTHLY_DUES
+}
 
 
 model VerificationToken {
@@ -170,3 +184,4 @@ enum Position {
    GUBERNATORIAL
    HOSUE_OF_REP
 }
+
